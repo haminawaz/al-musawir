@@ -15,11 +15,28 @@ npm run build && npm start
 | Path | What it holds |
 | --- | --- |
 | `src/app/` | One folder per page. `layout.tsx` has the shared header, footer and fonts. |
-| `src/app/globals.css` | Tailwind theme: colours, fonts, heading styles, the drafting-grid background. |
+| `src/app/globals.css` | Tailwind theme: colours, type sizes, the CAD dot grid, draw-on animation, print colours. |
 | `src/data/projects.ts` | Projects and their plans. |
-| `src/data/services.ts` | The four services (home page and Services page). |
+| `src/data/services.ts` | The four services, the four process steps, the land survey specs. |
 | `src/data/site.ts` | WhatsApp number, opening hours, nav links. |
-| `src/components/plan/` | Plan drawings: full plot map, thumbnail, legend, shared line styles. |
+| `src/components/plan/` | Plan drawings: full plot map, thumbnail, legend, service illustrations, line styles. |
+| `src/components/react-bits/` | Animated components from [React Bits](https://reactbits.dev), copied in as source. |
+
+## Design
+
+The site is styled like a draftsman's CAD workspace: a graphite canvas, light linework, one amber accent, and Geist / Geist Mono type with Newsreader italic for accent words. Project plot maps are shown as white paper sheets. All colours are CSS variables in `globals.css`, and the print styles swap them for black on white.
+
+Plan drawings come in two tones from the same geometry: `paper` (white sheet, used on project pages and for printing) and `model` (light lines on dark, used in the hero, thumbnails and legend).
+
+## React Bits
+
+Components are added with the shadcn CLI and land in `src/components/react-bits/`:
+
+```bash
+npx shadcn@latest add @react-bits/<Name>-TS-TW    # e.g. @react-bits/BlurText-TS-TW
+```
+
+In use: Crosshair and DotGrid (home hero), SplitText and RotatingText (hero text), ScrollVelocity (marquee), SpotlightCard (service cards), AnimatedContent (scroll reveals), Topography (land survey backgrounds), CountUp (project stats) and Magnet (footer button). They respect `prefers-reduced-motion`.
 
 ## Adding a project
 

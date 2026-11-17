@@ -1,43 +1,87 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { whatsappLink } from "@/data/site";
-import { buttonClass } from "./ui";
+import { buttonClass, WhatsAppIcon } from "./ui";
 
 const plotSizes = ["5 Marla", "10 Marla", "1 Kanal", "Commercial", "Other"];
-const field = "rounded-md border border-line bg-panel px-3 py-2.5 text-ink";
-const label = "grid gap-1 font-medium";
+const field =
+  "w-full rounded-lg border border-line-strong bg-raised px-4 py-3 text-fg transition placeholder:text-subtle hover:border-subtle focus:border-accent focus:outline-none aria-invalid:border-danger";
 
 /** Builds a WhatsApp message from the form and opens it in a new tab. Nothing is sent to a server. */
 export function ContactForm() {
+  const [cityError, setCityError] = useState(false);
+
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const message = `Plot: ${data.get("size")}\nCity: ${data.get("city")}\n${data.get("message") || ""}`;
+    const city = String(data.get("city") ?? "").trim();
+    if (!city) {
+      setCityError(true);
+      e.currentTarget.querySelector<HTMLInputElement>("input[name=city]")?.focus();
+      return;
+    }
+    const message = `Plot: ${data.get("size")}\nCity: ${city}\n${data.get("message") || ""}`;
     window.open(whatsappLink(message), "_blank", "noopener");
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid max-w-[480px] gap-3.5">
-      <label className={label}>
-        Plot size
-        <select name="size" className={field}>
-          {plotSizes.map((s) => (
-            <option key={s}>{s}</option>
+    <form onSubmit={handleSubmit} noValidate className="grid gap-7 rounded-2xl border border-line bg-surface p-6 sm:p-8">
+      <fieldset>
+        <legend className="mb-3 text-sm font-medium">Plot size</legend>
+        <div className="flex flex-wrap gap-2">
+          {plotSizes.map((s, i) => (
+            <label key={s} className="cursor-pointer">
+              <input type="radio" name="size" value={s} defaultChecked={i === 0} className="peer sr-only" />
+              <span className="inline-block rounded-full border border-line-strong px-4 py-2 text-sm text-muted transition peer-checked:border-accent peer-checked:bg-accent peer-checked:text-on-accent peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent hover:text-fg">
+                {s}
+              </span>
+            </label>
           ))}
-        </select>
-      </label>
-      <label className={label}>
-        City
-        <input name="city" required className={field} />
-      </label>
-      <label className={label}>
-        What do you need?
-        <textarea name="message" rows={4} className={field} />
-      </label>
-      <button type="submit" className={buttonClass()}>
-        Send on WhatsApp
-      </button>
+        </div>
+      </fieldset>
+
+      <div className="grid gap-2">
+        <label htmlFor="city" className="text-sm font-medium">
+          City
+        </label>
+        <input
+          id="city"
+          name="city"
+          autoComplete="address-level2"
+          placeholder="e.g. Lahore"
+          aria-invalid={cityError || undefined}
+          aria-describedby={cityError ? "city-error" : undefined}
+          onChange={() => cityError && setCityError(false)}
+          className={field}
+        />
+        {cityError && (
+          <p id="city-error" className="text-sm text-danger">
+            Enter your city so we can quote for your area.
+          </p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="message" className="text-sm font-medium">
+          What do you need? <span className="font-normal text-subtle">(optional)</span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows={4}
+          placeholder="Floor plan and approval drawings for a double-storey house"
+          className={field}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-subtle">Opens WhatsApp with your message filled in.</p>
+        <button type="submit" className={buttonClass()}>
+          <WhatsAppIcon className="size-5" />
+          Send on WhatsApp
+        </button>
+      </div>
     </form>
   );
 }

@@ -1,5 +1,6 @@
+import type { CSSProperties } from "react";
 import type { Opening, Project } from "@/data/projects";
-import { line, px, text } from "./styles";
+import { px, tones, type PlanTone } from "./styles";
 
 // Sheet layout, in SVG px. The plot depth always fills 600px; the scale follows from that.
 const MARGIN = 70;
@@ -7,10 +8,38 @@ const PLOT_DEPTH_PX = 600;
 const SHEET_HEIGHT = 790;
 const SHEET_RIGHT_SPACE = 90;
 
-/** Full plot map: plot boundary, setbacks, rooms, doors, windows, dimensions, north arrow and scale bar. */
-export function PlotMap({ project }: { project: Project }) {
+/**
+ * Full plot map: plot boundary, setbacks, rooms, doors, windows, dimensions, north arrow and scale bar.
+ * `animated` draws the linework in on load (skipped for people who prefer reduced motion).
+ */
+export function PlotMap({
+  project,
+  tone = "paper",
+  animated = false,
+  className = "mx-auto block h-auto w-full max-w-190",
+}: {
+  project: Project;
+  tone?: PlanTone;
+  animated?: boolean;
+  className?: string;
+}) {
   const { plot, rooms, openings } = project;
   const { front, rear, left, right } = plot.setbacks;
+  const t = tones[tone];
+
+  // Animation helpers: "draw" strokes a line in, "fade" fades an element up. Both no-ops when not animated.
+  const draw = (delay: number, duration = 1.1) =>
+    animated
+      ? {
+          pathLength: 1,
+          style: { "--draw-delay": `${delay}s`, "--draw-duration": `${duration}s` } as CSSProperties,
+        }
+      : {};
+  const fade = (delay: number) =>
+    animated ? { style: { "--draw-delay": `${delay}s` } as CSSProperties } : {};
+  const drawClass = animated ? " motion-safe:draw" : "";
+  const fadeClass = animated ? " motion-safe:fade-up" : "";
+  const fadeGroup = animated ? "motion-safe:fade-up" : undefined;
 
   const scale = PLOT_DEPTH_PX / plot.depth;
   const len = (ft: number) => px(ft * scale);
@@ -40,59 +69,78 @@ export function PlotMap({ project }: { project: Project }) {
       viewBox={`0 0 ${sheetWidth} ${SHEET_HEIGHT}`}
       role="img"
       aria-label={`Plot map of ${project.name}`}
-      className="mx-auto block h-auto w-full max-w-[760px]"
+      className={className}
     >
-      <rect width="100%" height="100%" className="fill-white" />
+      <rect width="100%" height="100%" className={t.background} />
 
       {/* Road along the front of the plot */}
-      <rect x={px(p.x - len(8))} y={pBottom + 10} width={px(p.w + len(16))} height={38} className="fill-[#e4e4e0]" />
-      <text className={text.road} x={midX} y={pBottom + 34} textAnchor="middle">
-        {plot.road}&apos; wide road
-      </text>
+      <g className={fadeGroup} {...fade(0.1)}>
+        <rect x={px(p.x - len(8))} y={pBottom + 10} width={px(p.w + len(16))} height={38} className={t.road} />
+        <text className={t.roadText} x={midX} y={pBottom + 34} textAnchor="middle">
+          {plot.road}&apos; wide road
+        </text>
+      </g>
 
       {/* Plot boundary and setback line */}
-      <rect className={line.plot} x={p.x} y={p.y} width={p.w} height={p.h} />
-      <rect className={line.setback} x={b.x} y={b.y} width={b.w} height={b.h} />
-      <text className={text.note} x={midX} y={px((bBottom + pBottom) / 2 + 3)} textAnchor="middle">
-        Front setback {front}&apos;
-      </text>
-      <text className={text.note} x={midX} y={px((p.y + b.y) / 2 + 3)} textAnchor="middle">
-        Rear setback {rear}&apos;
-      </text>
-      {left > 0 && (
-        <text className={text.note} transform={`translate(${px((p.x + b.x) / 2 + 3)},${midY}) rotate(-90)`} textAnchor="middle">
-          {left}&apos; side
+      <rect className={t.plot + fadeClass} {...fade(0)} x={p.x} y={p.y} width={p.w} height={p.h} />
+      <rect className={t.setback + fadeClass} {...fade(0.15)} x={b.x} y={b.y} width={b.w} height={b.h} />
+      <g className={fadeGroup} {...fade(1.9)}>
+        <text className={t.note} x={midX} y={px((bBottom + pBottom) / 2 + 3)} textAnchor="middle">
+          Front setback {front}&apos;
         </text>
-      )}
-      {right > 0 && (
-        <text className={text.note} transform={`translate(${px((bRight + pRight) / 2 + 3)},${midY}) rotate(-90)`} textAnchor="middle">
-          {right}&apos; side
+        <text className={t.note} x={midX} y={px((p.y + b.y) / 2 + 3)} textAnchor="middle">
+          Rear setback {rear}&apos;
         </text>
-      )}
+        {left > 0 && (
+          <text className={t.note} transform={`translate(${px((p.x + b.x) / 2 + 3)},${midY}) rotate(-90)`} textAnchor="middle">
+            {left}&apos; side
+          </text>
+        )}
+        {right > 0 && (
+          <text className={t.note} transform={`translate(${px((bRight + pRight) / 2 + 3)},${midY}) rotate(-90)`} textAnchor="middle">
+            {right}&apos; side
+          </text>
+        )}
+      </g>
 
       {/* Rooms */}
-      {rooms.map((r) => {
+      {rooms.map((r, i) => {
         const x = X(r.x);
         const x2 = X(r.x + r.w);
         return (
           <g key={r.name}>
-            <rect className={line.innerWall} x={x} y={Y(r.y)} width={len(r.w)} height={len(r.d)} />
+            <rect
+              className={t.innerWall + drawClass}
+              {...draw(0.35 + i * 0.08)}
+              x={x}
+              y={Y(r.y)}
+              width={len(r.w)}
+              height={len(r.d)}
+            />
             {r.stairs && (
               <path
-                className={line.tread}
-                d={Array.from({ length: r.d - 1 }, (_, i) => `M${x} ${Y(r.y + i + 1)}H${x2}`).join("")}
+                className={t.tread + fadeClass}
+                {...fade(1.2)}
+                d={Array.from({ length: r.d - 1 }, (_, k) => `M${x} ${Y(r.y + k + 1)}H${x2}`).join("")}
               />
             )}
           </g>
         );
       })}
-      <rect className={line.outerWall} x={b.x} y={b.y} width={b.w} height={b.h} />
+      <rect className={t.outerWall + drawClass} {...draw(0.2, 1.6)} x={b.x} y={b.y} width={b.w} height={b.h} />
 
       {/* Doors and windows: first cut a gap in the wall, then draw the symbol */}
       {openings
         .filter((o) => o.entrance)
         .map((o) => (
-          <text key={`entrance-${o.x}-${o.y}`} className={text.note} x={X(o.x)} y={px(Y(o.y) + 14)} textAnchor="middle">
+          <text
+            key={`entrance-${o.x}-${o.y}`}
+            className={t.note + fadeClass}
+            {...fade(1.9)}
+            x={X(o.x)}
+            y={px(Y(o.y) + 14)}
+            textAnchor="middle"
+          >
             Entrance
           </text>
         ))}
@@ -106,33 +154,34 @@ export function PlotMap({ project }: { project: Project }) {
             y1={0}
             x2={h}
             y2={0}
-            className="stroke-white stroke-8"
+            className={t.gap}
           />
         );
       })}
-      {openings.map((o) => {
+      {openings.map((o, i) => {
         const h = len(o.width / 2);
         return (
           <path
             key={`symbol-${o.x}-${o.y}`}
             transform={openingTransform(o, X, Y)}
             d={o.type === "door" ? doorPath(h) : windowPath(h)}
-            className={o.type === "door" ? line.door : line.window}
+            className={(o.type === "door" ? t.door : t.window) + drawClass}
+            {...draw(1.1 + i * 0.03, 0.6)}
           />
         );
       })}
 
       {/* Room names and sizes */}
-      {rooms.map((r) => {
+      {rooms.map((r, i) => {
         const size = r.label?.size ?? 11;
         const lx = X(r.label?.x ?? r.x + r.w / 2);
         const ly = Y(r.label?.y ?? r.y + r.d / 2);
         return (
-          <g key={r.name}>
-            <text className={text.roomName} fontSize={size} x={lx} y={ly} textAnchor="middle">
+          <g key={r.name} className={fadeGroup} {...fade(1.5 + i * 0.05)}>
+            <text className={t.roomName} fontSize={size} x={lx} y={ly} textAnchor="middle">
               {r.name}
             </text>
-            <text className={text.roomSize} fontSize={size - 1} x={lx} y={px(ly + size + 2)} textAnchor="middle">
+            <text className={t.roomSize} fontSize={size - 1} x={lx} y={px(ly + size + 2)} textAnchor="middle">
               {r.w}&apos; x {r.d}&apos;
             </text>
           </g>
@@ -140,40 +189,49 @@ export function PlotMap({ project }: { project: Project }) {
       })}
 
       {/* Overall dimensions */}
-      <path className={line.dimension} d={`M${p.x} 40H${pRight}M${p.x} 35V45M${pRight} 35V45`} />
-      <text className={text.dimension} x={midX} y={34} textAnchor="middle">
-        {plot.width}&apos;-0&quot;
-      </text>
-      <path className={line.dimension} d={`M36 ${p.y}V${pBottom}M31 ${p.y}H41M31 ${pBottom}H41`} />
-      <text className={text.dimension} x={30} y={midY} textAnchor="middle" transform={`rotate(-90 30 ${midY})`}>
-        {plot.depth}&apos;-0&quot;
-      </text>
-      <path className={line.dimension} d={`M${b.x} 58H${bRight}M${b.x} 53V63M${bRight} 53V63`} />
-      <text className={text.dimension} x={px(b.x + b.w / 2)} y={52} textAnchor="middle">
-        {plot.width - left - right}&apos;
-      </text>
+      <g className={fadeGroup} {...fade(2)}>
+        <path className={t.dimension} d={`M${p.x} 40H${pRight}M${p.x} 35V45M${pRight} 35V45`} />
+        <text className={t.dimensionText} x={midX} y={34} textAnchor="middle">
+          {plot.width}&apos;-0&quot;
+        </text>
+        <path className={t.dimension} d={`M36 ${p.y}V${pBottom}M31 ${p.y}H41M31 ${pBottom}H41`} />
+        <text className={t.dimensionText} x={30} y={midY} textAnchor="middle" transform={`rotate(-90 30 ${midY})`}>
+          {plot.depth}&apos;-0&quot;
+        </text>
+        <path className={t.dimension} d={`M${b.x} 58H${bRight}M${b.x} 53V63M${bRight} 53V63`} />
+        <text className={t.dimensionText} x={px(b.x + b.w / 2)} y={52} textAnchor="middle">
+          {plot.width - left - right}&apos;
+        </text>
+      </g>
 
       {/* North arrow */}
-      <circle cx={northX} cy={104} r={18} className="fill-none stroke-[#222]" />
-      <path d={`M${northX} 88L${px(northX + 7)} 116L${northX} 110L${px(northX - 7)} 116Z`} className="fill-[#222]" />
-      <text className={text.dimension} x={northX} y={80} textAnchor="middle">
-        N
-      </text>
+      <g className={fadeGroup} {...fade(2.1)}>
+        <circle cx={northX} cy={104} r={18} className={t.north} />
+        <path d={`M${northX} 88L${px(northX + 7)} 116L${northX} 110L${px(northX - 7)} 116Z`} className={t.northArrow} />
+        <text className={t.dimensionText} x={northX} y={80} textAnchor="middle">
+          N
+        </text>
+      </g>
 
       {/* Scale bar: 0, 5 and 10 ft */}
-      <path className={line.dimension} d={`M${MARGIN} 754H${tick(10)}M${MARGIN} 749V759M${tick(5)} 749V759M${tick(10)} 749V759`} />
-      <text className={text.note} x={MARGIN} y={772}>
-        0
-      </text>
-      <text className={text.note} x={tick(5)} y={772} textAnchor="middle">
-        5
-      </text>
-      <text className={text.note} x={tick(10)} y={772} textAnchor="middle">
-        10 ft
-      </text>
-      <text className={text.dimension} x={tick(14)} y={758}>
-        Scale {project.scale}
-      </text>
+      <g className={fadeGroup} {...fade(2.2)}>
+        <path
+          className={t.dimension}
+          d={`M${MARGIN} 754H${tick(10)}M${MARGIN} 749V759M${tick(5)} 749V759M${tick(10)} 749V759`}
+        />
+        <text className={t.note} x={MARGIN} y={772}>
+          0
+        </text>
+        <text className={t.note} x={tick(5)} y={772} textAnchor="middle">
+          5
+        </text>
+        <text className={t.note} x={tick(10)} y={772} textAnchor="middle">
+          10 ft
+        </text>
+        <text className={t.dimensionText} x={tick(14)} y={758}>
+          Scale {project.scale}
+        </text>
+      </g>
     </svg>
   );
 }

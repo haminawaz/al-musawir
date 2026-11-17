@@ -1,52 +1,143 @@
 @import "tailwindcss";
 
+/*
+  "Model space" theme: the site looks like a draftsman's CAD workspace.
+  Graphite canvas, light linework, one amber accent (the colour of survey instruments).
+  Drawing sheets (project plot maps) stay white paper, like a CAD layout tab.
+*/
 @theme {
-  --color-paper: #f4f4f2;
-  --color-panel: #fff;
-  --color-ink: #1d1d1d;
-  --color-muted: #666;
-  --color-line: #d6d6d2;
-  --color-tint: #e8e8e5;
-  --color-wash: #efefec;
-  --color-accent: #3d4a52;
-  --color-on-accent: #fff;
+  --color-canvas: #0f1113;
+  --color-surface: #15181b;
+  --color-raised: #1c2024;
+  --color-line: #262b30;
+  --color-line-strong: #363c43;
+  --color-fg: #eceef0;
+  --color-muted: #a0a7ae;
+  --color-subtle: #6f767e;
+  --color-accent: #e5ae4b;
+  --color-accent-strong: #f0be62;
+  --color-on-accent: #17130b;
+  --color-paper: #f6f5f1;
+  --color-paper-ink: #1d1d1d;
+  --color-danger: #f08a7a;
+
+  --text-display: clamp(2.9rem, 1.2rem + 5vw, 5.6rem);
+  --text-display--line-height: 0.95;
+  --text-display--letter-spacing: -0.045em;
+  --text-display--font-weight: 600;
+  --text-title: clamp(2.5rem, 1.6rem + 3.4vw, 4.5rem);
+  --text-title--line-height: 1;
+  --text-title--letter-spacing: -0.04em;
+  --text-title--font-weight: 600;
+  --text-heading: clamp(2rem, 1.45rem + 2.2vw, 3.25rem);
+  --text-heading--line-height: 1.04;
+  --text-heading--letter-spacing: -0.035em;
+  --text-heading--font-weight: 600;
+  --text-subheading: 1.375rem;
+  --text-subheading--line-height: 1.2;
+  --text-subheading--letter-spacing: -0.02em;
+  --text-subheading--font-weight: 600;
 }
 
 @theme inline {
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-serif: var(--font-newsreader), Georgia, serif;
-  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
 }
 
 @layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
   h1,
   h2,
   h3 {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    line-height: 1.15;
+    text-wrap: balance;
   }
-  h1 {
-    font-size: clamp(2.1rem, 5vw, 3.3rem);
-    max-width: 16ch;
+  p {
+    text-wrap: pretty;
   }
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  h3 {
-    font-size: 1.25rem;
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
   }
   :focus-visible {
-    outline: 3px solid var(--color-accent);
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 }
 
-/* Drafting-paper grid behind plan drawings. Set --graph-size to change the cell size. */
-@utility bg-graph {
-  background-color: var(--color-panel);
-  background-image:
-    linear-gradient(#0000000d 1px, transparent 1px),
-    linear-gradient(90deg, #0000000d 1px, transparent 1px);
-  background-size: var(--graph-size, 24px) var(--graph-size, 24px);
+/* Small uppercase mono label above headings. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* CAD grid: dots on a fixed pitch. Set --dots to change the pitch. */
+@utility bg-dots {
+  background-image: radial-gradient(circle at 1px 1px, var(--color-line-strong) 1px, transparent 0);
+  background-size: var(--dots, 24px) var(--dots, 24px);
+}
+
+/* Film grain to take the digital flatness off the dark canvas. */
+@utility bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Line drawing: needs pathLength="1" on the element. Ends with a solid stroke even where pathLength is unsupported. */
+@utility draw {
+  animation: draw var(--draw-duration, 1.1s) cubic-bezier(0.65, 0, 0.35, 1) var(--draw-delay, 0s) both;
+}
+@utility fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--draw-delay, 0s) both;
+}
+
+@keyframes draw {
+  0% {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  99.9% {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dasharray: none;
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Printing: black on white paper. Every colour is a variable, so swapping them flips the whole page. */
+@media print {
+  :root {
+    color-scheme: light;
+    --color-canvas: #fff;
+    --color-surface: #fff;
+    --color-raised: #fff;
+    --color-line: #c8c8c8;
+    --color-line-strong: #999;
+    --color-fg: #111;
+    --color-muted: #444;
+    --color-subtle: #666;
+    --color-accent: #111;
+  }
 }

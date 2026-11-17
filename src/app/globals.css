@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f4f4f2;
+  --color-panel: #fff;
+  --color-ink: #1d1d1d;
+  --color-muted: #666;
+  --color-line: #d6d6d2;
+  --color-tint: #e8e8e5;
+  --color-wash: #efefec;
+  --color-accent: #3d4a52;
+  --color-on-accent: #fff;
+}
+
+@theme inline {
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.3rem);
+    max-width: 16ch;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  h3 {
+    font-size: 1.25rem;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
+
+/* Drafting-paper grid behind plan drawings. Set --graph-size to change the cell size. */
+@utility bg-graph {
+  background-color: var(--color-panel);
+  background-image:
+    linear-gradient(#0000000d 1px, transparent 1px),
+    linear-gradient(90deg, #0000000d 1px, transparent 1px);
+  background-size: var(--graph-size, 24px) var(--graph-size, 24px);
+}

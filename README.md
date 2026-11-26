@@ -51,6 +51,7 @@ After the first seed, remove `ADMIN_PASSWORD`. Change the account later with `np
 | --- | --- |
 | `API_URL` | `https://api.example.com` |
 | `REVALIDATE_SECRET` | the same value as the backend's |
+| `SITE_URL` | `https://example.com` (canonical URLs and the sitemap) |
 
 Then `npm ci && npm run build && npm start`. The build reads the content, so the backend must be up first.
 

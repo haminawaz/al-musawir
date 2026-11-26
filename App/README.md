@@ -22,6 +22,7 @@ npm run build && npm start   # the backend must be reachable during the build
 | `API_URL` | The backend, e.g. `https://api.example.com`. Required in production. |
 | `REVALIDATE_SECRET` | Shared with the backend. With it, a save in the dashboard shows on the website straight away. |
 | `CONTENT_REVALIDATE_SECONDS` | Fallback refresh interval when no notice comes from the backend. Default 300. |
+| `SITE_URL` | The site's public address, e.g. `https://example.com`. Needed for canonical URLs, `og:url`, `robots.txt` and `sitemap.xml`; without it they are left out. |
 
 ## How content gets here
 

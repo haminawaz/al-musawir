@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/*
+  Same "model space" palette as the website: graphite canvas, light linework, one amber accent.
+  The dashboard is denser than the site, so the type scale is smaller.
+*/
+@theme {
+  --color-canvas: #0f1113;
+  --color-surface: #15181b;
+  --color-raised: #1c2024;
+  --color-line: #262b30;
+  --color-line-strong: #363c43;
+  --color-fg: #eceef0;
+  --color-muted: #a0a7ae;
+  --color-subtle: #6f767e;
+  --color-accent: #e5ae4b;
+  --color-accent-strong: #f0be62;
+  --color-on-accent: #17130b;
+  --color-paper: #f6f5f1;
+  --color-paper-ink: #1d1d1d;
+  --color-danger: #f08a7a;
+  --color-success: #8fd19e;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  /* Number inputs: no spinners, the values are typed. */
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* Small uppercase mono label. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-subtle);
+}
+
+/* CAD grid: dots on a fixed pitch. Set --dots to change the pitch. */
+@utility bg-dots {
+  background-image: radial-gradient(circle at 1px 1px, var(--color-line-strong) 1px, transparent 0);
+  background-size: var(--dots, 24px) var(--dots, 24px);
+}
+
+@utility fade-up {
+  animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s) both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Small sideways shake: the save bar asking to be noticed. */
+@keyframes nudge {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@utility skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, var(--color-raised) 25%, var(--color-line) 50%, var(--color-raised) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}

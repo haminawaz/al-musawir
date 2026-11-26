@@ -1,0 +1,24 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# typescript
+*.tsbuildinfo
+
+# env files
+.env*
+!.env.example
+
+# mock API data written at runtime (the seed files in src/mock/seed are the originals)
+/.mock-db.json
+
+# debug
+npm-debug.log*
+
+# misc
+.DS_Store
+.vercel

@@ -1,0 +1,161 @@
+{
+  "home": {
+    "hero": {
+      "eyebrow": "Naqsha nawees · Land survey · Pakistan",
+      "title": "Your plot, drawn",
+      "titleAccent": "to the last inch.",
+      "intro": "Residential and commercial plans, approval-ready drawings, and land survey for homeowners, builders and developers.",
+      "rotatingPrefix": "Drawings for",
+      "rotatingWords": ["5 Marla", "10 Marla", "1 Kanal", "commercial"],
+      "rotatingSuffix": "plots",
+      "primaryCta": "Get your plot drawn",
+      "secondaryCta": "See projects",
+      "facts": ["PDF + DWG files", "Approval-ready sets", "Same-day reply"],
+      "featuredProject": "family-house-10-marla"
+    },
+    "marquee": {
+      "lines": [
+        "5 Marla · 10 Marla · 1 Kanal · Commercial · ",
+        "Floor plans · Elevations · Working drawings · Approval sets · Land survey · "
+      ]
+    },
+    "servicesSection": {
+      "label": "Services",
+      "title": "Drawings your contractor",
+      "titleAccent": "can build from.",
+      "intro": "Every service ends with files you can print or send: PDF for review and DWG for your engineer.",
+      "linkLabel": "All services"
+    },
+    "processSection": {
+      "label": "Process",
+      "title": "From a WhatsApp message to",
+      "titleAccent": "a DWG file."
+    },
+    "projectsSection": {
+      "label": "Projects",
+      "title": "Recent",
+      "titleAccent": "drawings.",
+      "intro": "Sample plot maps, each with a room schedule and an area statement.",
+      "linkLabel": "All projects"
+    },
+    "surveySection": {
+      "label": "Land survey",
+      "title": "Before we draw,",
+      "titleAccent": "we measure.",
+      "intro": "Boundary and topographic surveys, so your drawings start from exact site measurements.",
+      "buttonLabel": "About land survey"
+    }
+  },
+  "services": {
+    "header": {
+      "label": "Services",
+      "title": "Four kinds of drawing,",
+      "titleAccent": "one set of files.",
+      "intro": "Every service ends with files you can print or send: PDF for review and DWG for your engineer."
+    },
+    "cta": {
+      "title": "Not sure which drawings you need?",
+      "text": "Send your plot size and what you plan to build. We will tell you.",
+      "buttonLabel": "Ask for a quote",
+      "whatsappMessage": "Hi, I would like a quote for drawings."
+    }
+  },
+  "projects": {
+    "header": {
+      "label": "Projects",
+      "title": "Plot maps,",
+      "titleAccent": "drawn to scale.",
+      "intro": "Select a plan to open its full plot map, room schedule and area statement."
+    },
+    "empty": {
+      "title": "No drawings in this size yet",
+      "text": "Send your plot size on WhatsApp to start one."
+    }
+  },
+  "projectDetail": {
+    "actions": {
+      "printButtonLabel": "Print map",
+      "askButtonLabel": "Ask about this plan",
+      "whatsappMessage": "Hi, I saw {name} ({drawingNo}) on your website."
+    },
+    "notes": {
+      "items": [
+        "All dimensions are in feet and inches unless stated.",
+        "Room sizes are internal clear sizes (placeholder).",
+        "This is a sample drawing for design preview only. Not for construction or approval.",
+        "Verify all dimensions on site before work begins."
+      ]
+    }
+  },
+  "survey": {
+    "header": {
+      "label": "Land survey",
+      "title": "Before we draw,",
+      "titleAccent": "we measure.",
+      "intro": "Accurate site measurement before any drawing begins. Every survey comes with a drawing file.",
+      "buttonLabel": "Book a survey",
+      "whatsappMessage": "Hi, I would like to book a land survey."
+    },
+    "figure": {
+      "caption": "Boundary points and contours",
+      "equipment": "Total Station + GPS"
+    }
+  },
+  "about": {
+    "header": {
+      "label": "About",
+      "title": "About",
+      "titleAccent": "Al-Musawir.",
+      "intro": "Placeholder: a short paragraph about the naqsha nawees, years of experience, the cities he works in, and how he works with clients. Replace with his own words."
+    },
+    "atAGlance": {
+      "label": "At a glance",
+      "rows": [
+        { "label": "Experience", "value": "Placeholder years" },
+        { "label": "Software", "value": "AutoCAD, SketchUp" },
+        { "label": "Approvals handled", "value": "Placeholder: LDA, CDA, RDA, housing societies" },
+        { "label": "Cities", "value": "Placeholder" }
+      ]
+    },
+    "process": {
+      "label": "How we work",
+      "title": "Four steps,",
+      "titleAccent": "start to finish."
+    }
+  },
+  "contact": {
+    "header": {
+      "label": "Contact",
+      "title": "Get your plot",
+      "titleAccent": "drawn.",
+      "intro": "Send your plot size and city. We reply the same day.",
+      "buttonLabel": "Message on WhatsApp",
+      "replyTime": "Same day"
+    },
+    "form": {
+      "plotSizes": ["5 Marla", "10 Marla", "1 Kanal", "Commercial", "Other"],
+      "cityPlaceholder": "e.g. Lahore",
+      "cityError": "Enter your city so we can quote for your area.",
+      "messagePlaceholder": "Floor plan and approval drawings for a double-storey house",
+      "helpText": "Opens WhatsApp with your message filled in.",
+      "submitLabel": "Send on WhatsApp"
+    }
+  },
+  "footer": {
+    "cta": {
+      "eyebrow": "Start a drawing",
+      "title": "Send your plot size and city.",
+      "titleAccent": "We reply the same day.",
+      "buttonLabel": "Message on WhatsApp",
+      "bottomLine": "Every drawing delivered as PDF and DWG"
+    }
+  },
+  "notFound": {
+    "content": {
+      "label": "Error 404",
+      "title": "This page is",
+      "titleAccent": "off the plot.",
+      "text": "The address may be mistyped, or the page has moved. Start again from the home page or see the projects."
+    }
+  }
+}

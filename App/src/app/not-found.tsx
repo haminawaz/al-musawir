@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AccentTitle, ArrowIcon, buttonClass, Container } from "@/components/ui";
 import { getPage } from "@/lib/content";
+
+export const metadata: Metadata = { title: "Page not found", robots: { index: false } };
 
 export default async function NotFound() {
   const { content: text } = await getPage("notFound");

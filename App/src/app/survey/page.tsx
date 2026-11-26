@@ -3,9 +3,13 @@ import { Reveal } from "@/components/motion";
 import Topography from "@/components/react-bits/Topography";
 import { AccentTitle, buttonClass, Container, WhatsAppIcon } from "@/components/ui";
 import { getPage, getSite, getSurveySpecs } from "@/lib/content";
+import { describe, pageMetadata } from "@/lib/seo";
 import { whatsappLink } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Land survey" };
+export async function generateMetadata(): Promise<Metadata> {
+  const [text, { site }] = await Promise.all([getPage("survey"), getSite()]);
+  return pageMetadata({ site, title: text.header.label, description: describe(text.header.intro), path: "/survey" });
+}
 
 const corners: [number, number, string][] = [
   [70, 80, "A"],

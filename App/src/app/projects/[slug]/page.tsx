@@ -8,6 +8,7 @@ import CountUp from "@/components/react-bits/CountUp";
 import { ArrowIcon, buttonClass, Container, KeyValueTable, Table, Td, Th, WhatsAppIcon } from "@/components/ui";
 import { findProjectPage, getPage, getProjectPage, getProjectSlugs, getSite } from "@/lib/content";
 import { coveredArea, fillTemplate, plotArea, plotSize, sqft, whatsappLink } from "@/lib/format";
+import { describe, pageMetadata } from "@/lib/seo";
 import type { ProjectSummary } from "@/lib/types";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -19,8 +20,16 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const page = await findProjectPage((await params).slug);
-  return page ? { title: page.project.name } : {};
+  const [page, { site }] = await Promise.all([findProjectPage((await params).slug), getSite()]);
+  if (!page) return {};
+  const { project } = page;
+  const where = project.city ? ` in ${project.city}` : "";
+  return pageMetadata({
+    site,
+    title: project.name,
+    description: describe(`${project.name}: ${plotSize(project)} plot${where}. Plot map, room schedule and area statement.`),
+    path: `/projects/${project.slug}`,
+  });
 }
 
 export default async function ProjectPage({ params }: Props) {
@@ -71,9 +80,9 @@ export default async function ProjectPage({ params }: Props) {
             {stats.map((s) => (
               <div key={s.label} className="bg-canvas px-5 py-5 sm:px-6">
                 <dt className="font-mono text-[0.7rem] tracking-[0.12em] text-subtle uppercase">{s.label}</dt>
-                <dd className="mt-2 flex items-baseline gap-1.5">
+                <dd className="mt-2 flex flex-wrap items-baseline gap-x-1.5">
                   <CountUp to={s.value} separator="," duration={1.4} className="text-3xl font-semibold tracking-[-0.03em] tabular-nums sm:text-4xl" />{" "}
-                  <span className="font-mono text-sm text-muted">{s.unit}</span>
+                  <span className="font-mono text-sm whitespace-nowrap text-muted">{s.unit}</span>
                 </dd>
               </div>
             ))}

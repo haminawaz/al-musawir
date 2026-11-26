@@ -2,16 +2,25 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { AccentTitle, buttonClass, Container, WhatsAppIcon } from "@/components/ui";
 import { getPage, getSite } from "@/lib/content";
-import { whatsappLink } from "@/lib/format";
+import { describe, pageMetadata } from "@/lib/seo";
+import { telLink, whatsappLink } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Contact" };
+export async function generateMetadata(): Promise<Metadata> {
+  const [text, { site }] = await Promise.all([getPage("contact"), getSite()]);
+  return pageMetadata({ site, title: text.header.label, description: describe(text.header.intro), path: "/contact" });
+}
 
 const delay = (s: number) => ({ "--draw-delay": `${s}s` }) as React.CSSProperties;
 
 export default async function ContactPage() {
   const [text, { site }] = await Promise.all([getPage("contact"), getSite()]);
-  const details = [
-    ["WhatsApp", site.whatsappDisplay],
+  const details: [string, React.ReactNode][] = [
+    [
+      "WhatsApp",
+      <a key="tel" href={telLink(site.whatsappNumber)} className="underline-offset-4 transition hover:text-accent hover:underline">
+        {site.whatsappDisplay}
+      </a>,
+    ],
     ["Hours", site.hours],
     ["Reply", text.header.replyTime],
   ];

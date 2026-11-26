@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getPage, getSite } from "@/lib/content";
+import { siteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -14,15 +15,21 @@ const newsreader = Newsreader({
   variable: "--font-newsreader",
 });
 
-/** Search title and description come from the dashboard (Settings › Search listing). */
+/** Search title and description come from the dashboard (Settings › Search listing). Pages add their own. */
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = await getSite();
+  const base = siteUrl();
   return {
+    ...(base ? { metadataBase: base } : {}),
     title: { default: site.seo.title, template: `%s | ${site.name}` },
     description: site.seo.description,
+    applicationName: site.name,
     openGraph: { siteName: site.name, title: site.seo.title, description: site.seo.description, type: "website" },
+    twitter: { card: "summary", title: site.seo.title, description: site.seo.description },
   };
 }
+
+export const viewport: Viewport = { themeColor: "#0f1113", colorScheme: "dark" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [{ site, navigation }, footer] = await Promise.all([getSite(), getPage("footer")]);

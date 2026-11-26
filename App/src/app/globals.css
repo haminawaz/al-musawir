@@ -13,7 +13,8 @@
   --color-line-strong: #363c43;
   --color-fg: #eceef0;
   --color-muted: #a0a7ae;
-  --color-subtle: #6f767e;
+  /* Smallest step lighter than #6f767e that reaches WCAG AA (4.5:1) on canvas, surface and raised. */
+  --color-subtle: #828991;
   --color-accent: #e5ae4b;
   --color-accent-strong: #f0be62;
   --color-on-accent: #17130b;

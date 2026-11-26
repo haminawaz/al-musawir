@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { ProcessSteps } from "@/components/process-steps";
 import { AccentTitle, Container, KeyValueTable, PageHeader, SectionHeader } from "@/components/ui";
-import { getPage, getProcessSteps } from "@/lib/content";
+import { getPage, getProcessSteps, getSite } from "@/lib/content";
+import { describe, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "About" };
+export async function generateMetadata(): Promise<Metadata> {
+  const [text, { site }] = await Promise.all([getPage("about"), getSite()]);
+  return pageMetadata({ site, title: text.header.label, description: describe(text.header.intro), path: "/about" });
+}
 
 export default async function AboutPage() {
   const [text, processSteps] = await Promise.all([getPage("about"), getProcessSteps()]);

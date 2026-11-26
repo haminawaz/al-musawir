@@ -351,6 +351,9 @@ const SplitText = ({
 
       const splitInstance = new GSAPSplitText(el, {
         type: splitType,
+        // The animated copy is hidden from assistive tech; a screen-reader-only copy is rendered next to it.
+        // ("auto" would put aria-label on the element, which ARIA does not allow on a span or p.)
+        aria: 'hidden',
         smartWrap: true,
         autoSplit: splitType === 'lines',
         mask: mask ? unit : undefined,
@@ -441,19 +444,23 @@ const SplitText = ({
     hoverEffect === 'none' && (from !== undefined || to !== undefined || effect === 'rise' || effect === 'fade');
 
   return (
-    <Tag
-      key={text}
-      ref={ref}
-      className={`split-parent inline-block whitespace-normal ${clip ? 'overflow-hidden' : 'overflow-visible'} ${trigger === 'click' ? 'cursor-pointer' : ''} ${className}`}
-      style={{
-        textAlign,
-        wordWrap: 'break-word',
-        color,
-        visibility: ready ? undefined : 'hidden'
-      }}
-    >
-      {text}
-    </Tag>
+    <>
+      <Tag
+        key={text}
+        ref={ref}
+        aria-hidden="true"
+        className={`split-parent inline-block whitespace-normal ${clip ? 'overflow-hidden' : 'overflow-visible'} ${trigger === 'click' ? 'cursor-pointer' : ''} ${className}`}
+        style={{
+          textAlign,
+          wordWrap: 'break-word',
+          color,
+          visibility: ready ? undefined : 'hidden'
+        }}
+      >
+        {text}
+      </Tag>
+      <span className="sr-only">{text}</span>
+    </>
   );
 };
 

@@ -3,9 +3,13 @@ import { Reveal } from "@/components/motion";
 import { ServiceArt } from "@/components/plan/service-art";
 import { AccentTitle, buttonClass, Container, PageHeader, WhatsAppIcon } from "@/components/ui";
 import { getPage, getServices, getSite } from "@/lib/content";
+import { describe, pageMetadata } from "@/lib/seo";
 import { whatsappLink } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Services" };
+export async function generateMetadata(): Promise<Metadata> {
+  const [text, { site }] = await Promise.all([getPage("services"), getSite()]);
+  return pageMetadata({ site, title: text.header.label, description: describe(text.header.intro), path: "/services" });
+}
 
 export default async function ServicesPage() {
   const [text, services, { site }] = await Promise.all([getPage("services"), getServices(), getSite()]);

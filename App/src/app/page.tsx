@@ -11,6 +11,12 @@ import Topography from "@/components/react-bits/Topography";
 import { AccentTitle, ArrowIcon, buttonClass, Container, SectionHeader, textLinkClass } from "@/components/ui";
 import { findProjectPage, getPage, getProcessSteps, getProjects, getServices, getSite, getSurveySpecs } from "@/lib/content";
 import { plotSize, whatsappLink } from "@/lib/format";
+import { pageMetadata } from "@/lib/seo";
+
+export async function generateMetadata() {
+  const { site } = await getSite();
+  return pageMetadata({ site, description: site.seo.description, path: "/" });
+}
 
 // Wide card, narrow card, then narrow, wide: a zig-zag instead of a row of equal boxes.
 const serviceSpans = ["md:col-span-7", "md:col-span-5", "md:col-span-5", "md:col-span-7"];
@@ -100,7 +106,7 @@ export default async function HomePage() {
                 <Link href="/services" className="flex h-full flex-col p-7 sm:p-8">
                   <div className="flex items-center justify-between font-mono text-xs text-subtle">
                     <span className="text-accent">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="opacity-0 transition group-hover:opacity-100">View service →</span>
+                    <span className="opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">View service →</span>
                   </div>
                   <ServiceArt id={s.id} className="mx-auto my-8 h-auto w-full max-w-75" />
                   <h3 className="mt-auto text-subheading">{s.name}</h3>

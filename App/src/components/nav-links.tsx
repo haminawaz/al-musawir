@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { whatsappLink } from "@/lib/format";
 import type { NavLink } from "@/lib/types";
+import { useMediaQuery } from "./motion";
 import { buttonClass, WhatsAppIcon } from "./ui";
 
 function isCurrent(pathname: string, href: string) {
@@ -24,7 +25,12 @@ export function NavLinks({
   hours: string;
 }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  // The menu only exists below the desktop breakpoint: widening the window (e.g. rotating a tablet)
+  // closes it, so the page is never left locked behind a menu that CSS has hidden.
+  const desktop = useMediaQuery("(min-width: 1024px)");
+  const open = menuOpen && !desktop;
 
   // Close the menu after navigating.
   const [lastPath, setLastPath] = useState(pathname);
@@ -35,12 +41,22 @@ export function NavLinks({
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      toggleRef.current?.focus();
+    };
+    // The menu covers the page: keep keyboard and screen-reader focus out of what is behind it.
+    const behind = [document.getElementById("main"), document.querySelector("body > footer")].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement,
+    );
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    behind.forEach((el) => (el.inert = true));
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      behind.forEach((el) => (el.inert = false));
     };
   }, [open]);
 
@@ -67,11 +83,13 @@ export function NavLinks({
       <div className="flex items-center gap-2">
         <a href={whatsappLink(whatsappNumber)} className={buttonClass("primary", "sm")}>
           <WhatsAppIcon />
-          WhatsApp
+          {/* Icon only on the narrowest phones, so the header fits on one line at 320px. */}
+          <span className="max-[359px]:sr-only">WhatsApp</span>
         </a>
         <button
+          ref={toggleRef}
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => setOpen(!open)}
           aria-expanded={open}
           aria-controls="mobile-menu"
           className="relative grid size-10 cursor-pointer place-items-center rounded-lg border border-line-strong transition hover:bg-raised active:scale-95 lg:hidden"
@@ -110,7 +128,11 @@ export function NavLinks({
             })}
           </nav>
           <div className="px-5 py-8 font-mono text-sm text-muted sm:px-8">
-            <p>WhatsApp {whatsappDisplay}</p>
+            <p>
+              <a href={whatsappLink(whatsappNumber)} className="underline-offset-4 transition hover:text-fg hover:underline">
+                WhatsApp {whatsappDisplay}
+              </a>
+            </p>
             <p>{hours}</p>
           </div>
         </div>

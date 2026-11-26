@@ -40,7 +40,7 @@ export const getProcessSteps = () => get<TitledItem[]>("/process-steps");
 export const getSurveySpecs = () => get<TitledItem[]>("/survey-specs");
 export const getCategories = () => get<Category[]>("/categories");
 export const getProjects = () => get<ProjectSummary[]>("/projects");
-export const getProjectSlugs = () => get<{ slug: string }[]>("/projects/slugs");
+export const getProjectSlugs = () => get<{ slug: string; updatedAt: string }[]>("/projects/slugs");
 export const getPage = <K extends PageKey>(key: K) => get<PageTexts[K]>(`/pages/${key}`);
 
 /** One project with its neighbours, or null when it does not exist. */

@@ -11,6 +11,9 @@ export function whatsappLink(number: string, text?: string) {
   return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
 
+/** A tel: link for the business number (digits with country code, as stored for WhatsApp). */
+export const telLink = (number: string) => `tel:+${number.replace(/\D/g, "")}`;
+
 /** Fills {name}-style placeholders, e.g. in the project page's WhatsApp message. */
 export const fillTemplate = (template: string, values: Record<string, string>) =>
   template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);

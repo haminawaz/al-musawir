@@ -4,14 +4,24 @@ import type { ProjectSummary } from "@/lib/types";
 import { PlanThumb } from "./plan/plan-thumb";
 import { ArrowIcon } from "./ui";
 
-/** Project card: the plan drawn in model space, name, plot size and three key numbers. */
-export function ProjectCard({ project }: { project: ProjectSummary }) {
+/**
+ * Project card: the plan drawn in model space, name, plot size and three key numbers.
+ * `headingLevel` keeps the page outline in order: h2 right under a page's h1, h3 inside an h2 section.
+ */
+export function ProjectCard({ project, headingLevel = 3 }: { project: ProjectSummary; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const area = project.plotArea;
   const covered = project.coveredArea;
-  const stats = [
-    ["Plot", `${area.toLocaleString("en-US")} sq ft`],
-    ["Covered", `${covered.toLocaleString("en-US")} sq ft`],
-    ["Coverage", `${Math.round((covered / area) * 100)}%`],
+  // The unit never splits across lines: "1,125 sq ft" wraps as "1,125" / "sq ft" in narrow cards.
+  const sqftValue = (n: number) => (
+    <>
+      {n.toLocaleString("en-US")} <span className="whitespace-nowrap">sq ft</span>
+    </>
+  );
+  const stats: [string, React.ReactNode][] = [
+    ["Plot", sqftValue(area)],
+    ["Covered", sqftValue(covered)],
+    ["Coverage", `${area > 0 ? Math.round((covered / area) * 100) : 0}%`],
   ];
 
   return (
@@ -32,7 +42,7 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
       </div>
       <div className="flex items-start justify-between gap-4 p-5 sm:p-6">
         <div>
-          <h3 className="text-subheading">{project.name}</h3>
+          <Heading className="text-subheading">{project.name}</Heading>
           <p className="mt-1 font-mono text-[0.8rem] text-muted">{plotSize(project)}</p>
         </div>
         <span className="grid size-10 shrink-0 place-items-center rounded-full border border-line-strong text-muted transition duration-300 group-hover:border-accent group-hover:bg-accent group-hover:text-on-accent">

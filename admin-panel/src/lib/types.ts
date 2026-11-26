@@ -1,6 +1,4 @@
-// Content types shared by the dashboard and the mock API.
-// Site, nav, services, categories and projects keep the same shape as the website's src/data files,
-// so the website can read them from the API later with few changes.
+// Content types, as the backend's admin API (../backend, /api/admin) sends and accepts them.
 
 export type Site = {
   name: string;
@@ -98,7 +96,7 @@ export type Activity = {
   id: string;
   at: string;
   user: string;
-  action: "created" | "updated" | "deleted" | "reset";
+  action: "created" | "updated" | "deleted";
   target: string;
   /** Dashboard path to the thing that changed, when it still exists. */
   href?: string;

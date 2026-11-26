@@ -1,47 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Legend } from "@/components/plan/legend";
 import { PlanThumb } from "@/components/plan/plan-thumb";
 import { PlotMap } from "@/components/plan/plot-map";
 import { PrintButton } from "@/components/print-button";
 import CountUp from "@/components/react-bits/CountUp";
 import { ArrowIcon, buttonClass, Container, KeyValueTable, Table, Td, Th, WhatsAppIcon } from "@/components/ui";
-import { coveredArea, getProject, plotArea, plotSize, projects, sqft, type Project } from "@/data/projects";
-import { site, whatsappLink } from "@/data/site";
+import { findProjectPage, getPage, getProjectPage, getProjectSlugs, getSite } from "@/lib/content";
+import { coveredArea, fillTemplate, plotArea, plotSize, sqft, whatsappLink } from "@/lib/format";
+import type { ProjectSummary } from "@/lib/types";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const notes = [
-  "All dimensions are in feet and inches unless stated.",
-  "Room sizes are internal clear sizes (placeholder).",
-  "This is a sample drawing for design preview only. Not for construction or approval.",
-  "Verify all dimensions on site before work begins.",
-];
-
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+// Projects that exist at build time are prerendered. Ones added later in the dashboard are rendered
+// on their first visit and cached; unknown addresses show the 404 page.
+export async function generateStaticParams() {
+  return (await getProjectSlugs()).map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const project = getProject((await params).slug);
-  return { title: project?.name };
+  const page = await findProjectPage((await params).slug);
+  return page ? { title: page.project.name } : {};
 }
 
 export default async function ProjectPage({ params }: Props) {
-  const project = getProject((await params).slug);
-  if (!project) notFound();
+  const { slug } = await params;
+  const [{ project, previous, next }, text, { site }] = await Promise.all([getProjectPage(slug), getPage("projectDetail"), getSite()]);
 
-  const index = projects.indexOf(project);
-  const prev = projects[index - 1];
-  const next = projects[index + 1];
   const { plot } = project;
   const { front, rear, left, right } = plot.setbacks;
   const area = plotArea(project);
   const covered = coveredArea(project);
-  const coverage = Math.round((covered / area) * 100);
+  const coverage = area > 0 ? Math.round((covered / area) * 100) : 0;
 
   const stats = [
     { label: "Plot area", value: area, unit: "sq ft" },
@@ -49,6 +39,7 @@ export default async function ProjectPage({ params }: Props) {
     { label: "Ground coverage", value: coverage, unit: "%" },
     { label: "Road width", value: plot.road, unit: "ft" },
   ];
+  const askMessage = fillTemplate(text.actions.whatsappMessage, { name: project.name, drawingNo: project.drawingNo });
 
   return (
     <>
@@ -65,17 +56,14 @@ export default async function ProjectPage({ params }: Props) {
             <div>
               <h1 className="text-title">{project.name}</h1>
               <p className="mt-4 font-mono text-sm text-muted">
-                {plotSize(project)} · {project.city} · {project.floors}
+                {[plotSize(project), project.city, project.floors].filter(Boolean).join(" · ")}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <PrintButton>Print map</PrintButton>
-              <a
-                href={whatsappLink(`Hi, I saw ${project.name} (${project.drawingNo}) on your website.`)}
-                className={buttonClass()}
-              >
+              <PrintButton>{text.actions.printButtonLabel}</PrintButton>
+              <a href={whatsappLink(site.whatsappNumber, askMessage)} className={buttonClass()}>
                 <WhatsAppIcon className="size-5" />
-                Ask about this plan
+                {text.actions.askButtonLabel}
               </a>
             </div>
           </div>
@@ -106,7 +94,7 @@ export default async function ProjectPage({ params }: Props) {
               rows={[
                 ["Project", project.name],
                 ["Client", project.client],
-                ["Location", `${project.city}, ${project.society}`],
+                ["Location", [project.city, project.society].filter(Boolean).join(", ")],
                 ["Plot no.", project.plotNo],
                 ["Plot size", plotSize(project)],
                 ["Floors", project.floors],
@@ -151,8 +139,8 @@ export default async function ProjectPage({ params }: Props) {
               </tr>
             </thead>
             <tbody>
-              {project.rooms.map((r) => (
-                <tr key={r.name} className="transition-colors hover:bg-surface">
+              {project.rooms.map((r, i) => (
+                <tr key={i} className="transition-colors hover:bg-surface">
                   <Td>{r.name}</Td>
                   <Td className="font-mono text-sm text-muted">
                     {r.w}&apos; x {r.d}&apos;
@@ -171,8 +159,8 @@ export default async function ProjectPage({ params }: Props) {
         <div className="lg:col-span-5">
           <h2 className="eyebrow mb-4">Notes</h2>
           <ol className="space-y-3 text-[0.95rem] text-muted">
-            {notes.map((n, i) => (
-              <li key={n} className="flex gap-4 border-b border-line pb-3">
+            {text.notes.items.map((n, i) => (
+              <li key={i} className="flex gap-4 border-b border-line pb-3">
                 <span className="font-mono text-xs text-subtle">{String(i + 1).padStart(2, "0")}</span>
                 {n}
               </li>
@@ -183,7 +171,7 @@ export default async function ProjectPage({ params }: Props) {
 
       <Container className="pb-24 print:hidden">
         <nav aria-label="More projects" className="grid gap-4 sm:grid-cols-2">
-          {prev ? <NeighbourLink project={prev} direction="Previous" /> : <span className="hidden sm:block" />}
+          {previous ? <NeighbourLink project={previous} direction="Previous" /> : <span className="hidden sm:block" />}
           {next && <NeighbourLink project={next} direction="Next" />}
         </nav>
       </Container>
@@ -191,7 +179,7 @@ export default async function ProjectPage({ params }: Props) {
   );
 }
 
-function NeighbourLink({ project, direction }: { project: Project; direction: "Previous" | "Next" }) {
+function NeighbourLink({ project, direction }: { project: ProjectSummary; direction: "Previous" | "Next" }) {
   const isNext = direction === "Next";
   return (
     <Link

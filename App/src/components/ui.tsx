@@ -75,6 +75,15 @@ export function Accent({ children }: { children: ReactNode }) {
   return <span className="font-serif font-normal tracking-[-0.02em] text-accent italic">{children}</span>;
 }
 
+/** A heading from page text: the title, then its accent words. */
+export function AccentTitle({ text }: { text: { title: string; titleAccent: string } }) {
+  return (
+    <>
+      {text.title} {text.titleAccent && <Accent>{text.titleAccent}</Accent>}
+    </>
+  );
+}
+
 const buttonBase =
   "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap transition duration-200 active:scale-[0.98] print:hidden";
 

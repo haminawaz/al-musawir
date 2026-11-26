@@ -1,5 +1,8 @@
-import type { Project } from "@/data/projects";
+import type { Plot, Room } from "@/lib/types";
 import { px, tones, type PlanTone } from "./styles";
+
+/** What a thumbnail draws: a full project or a project card both have it. */
+type PlanOutline = { name: string; plot: Plot; rooms: Pick<Room, "name" | "x" | "y" | "w" | "d">[] };
 
 const PAD_Y = 14;
 
@@ -15,7 +18,7 @@ export function PlanThumb({
   interactive = false,
   className = "block h-auto w-full",
 }: {
-  project: Project;
+  project: PlanOutline;
   width?: number;
   height?: number;
   tone?: PlanTone;
@@ -36,8 +39,8 @@ export function PlanThumb({
   return (
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Plan thumbnail of ${project.name}`} className={className}>
       <rect className={t.plot} x={px(ox)} y={PAD_Y} width={px(plotW)} height={height - PAD_Y * 2} />
-      {rooms.map((r) => (
-        <rect key={r.name} className={t.innerWall + hover} x={X(r.x)} y={Y(r.y)} width={len(r.w)} height={len(r.d)} />
+      {rooms.map((r, i) => (
+        <rect key={i} className={t.innerWall + hover} x={X(r.x)} y={Y(r.y)} width={len(r.w)} height={len(r.d)} />
       ))}
       <rect
         className={t.outerWall + hover}

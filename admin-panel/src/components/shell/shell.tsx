@@ -18,7 +18,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { LogoMark } from "@/components/ui/logo";
-import { api, endpoints, isMockApi, siteUrl, type EndpointTypes } from "@/lib/api";
+import { api, endpoints, siteUrl, type EndpointTypes } from "@/lib/api";
 import { useResource } from "@/lib/hooks";
 import { LeaveGuard, useLeaveGuard } from "@/lib/unsaved";
 
@@ -92,14 +92,6 @@ export function Shell({ children }: { children: ReactNode }) {
       >
         <div className="flex h-16 items-center justify-between gap-2 border-b border-line px-5">
           <Brand />
-          {isMockApi && (
-            <span
-              title="Changes are saved by the mock API in this app, not by the real backend."
-              className="rounded-full border border-accent/40 px-2 py-0.5 font-mono text-[0.62rem] tracking-wider text-accent uppercase"
-            >
-              Mock
-            </span>
-          )}
         </div>
         <nav aria-label="Dashboard" className="flex-1 overflow-y-auto px-3 py-4">
           {groups.map((group, gi) => (

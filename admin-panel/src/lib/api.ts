@@ -13,11 +13,12 @@ import type {
   SurveySpec,
 } from "./types";
 
-// The only place the dashboard talks to the server.
-// Today that is the mock API in src/app/api. To switch to the real backend, set NEXT_PUBLIC_API_URL
-// to its address; the backend must answer the same paths with the same JSON (see README.md).
+// The only place the dashboard's pages talk to the server.
+// Requests go to /api on the dashboard's own domain, and src/app/api/[...path]/route.ts forwards them
+// to the backend's admin API (API_URL). The browser never calls the backend directly, so the session
+// cookie belongs to the dashboard's domain wherever the backend is hosted.
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "/api").replace(/\/$/, "");
+const BASE_URL = "/api";
 
 export class ApiError extends Error {
   constructor(
@@ -76,7 +77,6 @@ export const endpoints = {
   projects: "/projects",
   project: (slug: string) => `/projects/${encodeURIComponent(slug)}`,
   page: (key: PageKey) => `/pages/${key}`,
-  resetMock: "/mock/reset",
 } as const;
 
 export type EndpointTypes = {
@@ -93,5 +93,4 @@ export type EndpointTypes = {
   me: { user: SessionUser };
 };
 
-export const isMockApi = BASE_URL === "/api";
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");

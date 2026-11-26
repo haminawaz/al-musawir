@@ -1,14 +1,10 @@
 "use client";
 
-import { ExternalLink, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { ItemControls } from "@/components/editors/list-editors";
-import { Button, Spinner } from "@/components/ui/button";
-import { useConfirm } from "@/components/ui/confirm";
 import { inputClass, TextField } from "@/components/ui/field";
 import { Card, ErrorState, ErrorSummary, LoadingState, PageTitle, SaveBar } from "@/components/ui/layout";
-import { useToast } from "@/components/ui/toast";
-import { api, endpoints, isMockApi, type EndpointTypes } from "@/lib/api";
+import { endpoints, type EndpointTypes } from "@/lib/api";
 import { listOps, useDocument } from "@/lib/hooks";
 import type { Site } from "@/lib/types";
 import { validateNavigation, validateSite } from "@/lib/validate";
@@ -19,34 +15,10 @@ export function SettingsEditor() {
     label: "Navigation",
     validate: (d) => validateNavigation(d, d),
   });
-  const confirm = useConfirm();
-  const toast = useToast();
-  const [resetting, setResetting] = useState(false);
 
   async function saveAll() {
     // Save whichever has changes; each reports its own result.
     await Promise.all([site.dirty && site.save(), nav.dirty && nav.save()]);
-  }
-
-  async function resetMock() {
-    const ok = await confirm({
-      title: "Reset all content?",
-      body: "Every project, service and piece of page text goes back to the copy taken from the website. Your edits here are lost.",
-      confirmLabel: "Reset content",
-      danger: true,
-    });
-    if (!ok) return;
-    setResetting(true);
-    try {
-      await api.post(endpoints.resetMock);
-      toast.success("Content reset.");
-      site.reload();
-      nav.reload();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not reset.");
-    } finally {
-      setResetting(false);
-    }
   }
 
   const error = site.state.status === "error" ? site.state : nav.state.status === "error" ? nav.state : null;
@@ -152,21 +124,6 @@ export function SettingsEditor() {
             ))}
           </ol>
         </Card>
-
-        {isMockApi && (
-          <Card title="Mock data" description="The dashboard is running on the mock API built into this app, until the backend is ready.">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="max-w-[60ch] text-sm text-muted">
-                Changes are kept in <span className="font-mono text-fg">.mock-db.json</span> on the server. Reset puts everything back to the
-                content copied from the website.
-              </p>
-              <Button variant="danger" size="sm" onClick={resetMock} disabled={resetting}>
-                {resetting ? <Spinner className="size-3.5" /> : <RotateCcw className="size-3.5" aria-hidden="true" />}
-                Reset content
-              </Button>
-            </div>
-          </Card>
-        )}
       </div>
 
       <SaveBar

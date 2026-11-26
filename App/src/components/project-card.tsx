@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { coveredArea, plotArea, plotSize, type Project } from "@/data/projects";
+import { plotSize } from "@/lib/format";
+import type { ProjectSummary } from "@/lib/types";
 import { PlanThumb } from "./plan/plan-thumb";
 import { ArrowIcon } from "./ui";
 
 /** Project card: the plan drawn in model space, name, plot size and three key numbers. */
-export function ProjectCard({ project }: { project: Project }) {
-  const area = plotArea(project);
-  const covered = coveredArea(project);
+export function ProjectCard({ project }: { project: ProjectSummary }) {
+  const area = project.plotArea;
+  const covered = project.coveredArea;
   const stats = [
     ["Plot", `${area.toLocaleString("en-US")} sq ft`],
     ["Covered", `${covered.toLocaleString("en-US")} sq ft`],

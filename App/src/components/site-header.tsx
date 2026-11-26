@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { site } from "@/data/site";
+import type { NavLink, Site } from "@/lib/types";
 import { NavLinks } from "./nav-links";
 import { Container, LogoMark } from "./ui";
 
-export function SiteHeader() {
+export function SiteHeader({ site, navigation }: { site: Site; navigation: NavLink[] }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line print:hidden">
       {/* The blur sits on its own layer: backdrop-filter on <header> itself would trap the
@@ -13,11 +13,18 @@ export function SiteHeader() {
         <Link href="/" className="flex items-center gap-2.5" aria-label={`${site.name}, home`}>
           <LogoMark className="size-8" />
           <span className="text-[1.05rem] font-semibold tracking-[-0.02em]">{site.name}</span>
-          <span className="hidden font-mono text-[0.68rem] tracking-[0.14em] text-subtle uppercase xl:inline">
-            Naqsha nawees
-          </span>
+          {site.headerLabel && (
+            <span className="hidden font-mono text-[0.68rem] tracking-[0.14em] text-subtle uppercase xl:inline">
+              {site.headerLabel}
+            </span>
+          )}
         </Link>
-        <NavLinks />
+        <NavLinks
+          links={navigation}
+          whatsappNumber={site.whatsappNumber}
+          whatsappDisplay={site.whatsappDisplay}
+          hours={site.hours}
+        />
       </Container>
     </header>
   );

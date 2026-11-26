@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/motion";
 import Topography from "@/components/react-bits/Topography";
-import { Accent, buttonClass, Container, WhatsAppIcon } from "@/components/ui";
-import { surveySpecs } from "@/data/services";
-import { whatsappLink } from "@/data/site";
+import { AccentTitle, buttonClass, Container, WhatsAppIcon } from "@/components/ui";
+import { getPage, getSite, getSurveySpecs } from "@/lib/content";
+import { whatsappLink } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Land survey" };
 
@@ -16,7 +16,9 @@ const corners: [number, number, string][] = [
 
 const delay = (s: number) => ({ "--draw-delay": `${s}s` }) as React.CSSProperties;
 
-export default function SurveyPage() {
+export default async function SurveyPage() {
+  const [text, surveySpecs, { site }] = await Promise.all([getPage("survey"), getSurveySpecs(), getSite()]);
+
   return (
     <>
       <section className="relative isolate overflow-hidden border-b border-line">
@@ -25,32 +27,32 @@ export default function SurveyPage() {
         </div>
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-r from-canvas via-canvas/80 to-canvas/10" />
         <Container className="pt-16 pb-20 sm:pt-28 sm:pb-32">
-          <p className="eyebrow motion-safe:fade-up">Land survey</p>
+          <p className="eyebrow motion-safe:fade-up">{text.header.label}</p>
           <h1 className="mt-6 max-w-[13ch] text-title motion-safe:fade-up" style={delay(0.08)}>
-            Before we draw, <Accent>we measure.</Accent>
+            <AccentTitle text={text.header} />
           </h1>
           <p className="mt-6 max-w-[50ch] text-lg text-muted motion-safe:fade-up" style={delay(0.16)}>
-            Accurate site measurement before any drawing begins. Every survey comes with a drawing file.
+            {text.header.intro}
           </p>
           <a
-            href={whatsappLink("Hi, I would like to book a land survey.")}
+            href={whatsappLink(site.whatsappNumber, text.header.whatsappMessage)}
             className={`${buttonClass()} mt-10 motion-safe:fade-up`}
             style={delay(0.24)}
           >
             <WhatsAppIcon className="size-5" />
-            Book a survey
+            {text.header.buttonLabel}
           </a>
         </Container>
       </section>
 
       <Container className="grid gap-12 py-20 sm:py-28 lg:grid-cols-12 lg:gap-10">
         <Reveal stagger={0.08} className="grid content-start gap-px self-start overflow-hidden rounded-2xl border border-line bg-line lg:col-span-5">
-          {surveySpecs.map(([k, v], i) => (
-            <div key={k} className="flex gap-5 bg-canvas px-6 py-6">
+          {surveySpecs.map((spec, i) => (
+            <div key={i} className="flex gap-5 bg-canvas px-6 py-6">
               <span className="font-mono text-sm text-accent">{String(i + 1).padStart(2, "0")}</span>
               <div>
-                <h2 className="font-medium">{k}</h2>
-                <p className="mt-1 text-muted">{v}</p>
+                <h2 className="font-medium">{spec.title}</h2>
+                <p className="mt-1 text-muted">{spec.text}</p>
               </div>
             </div>
           ))}
@@ -81,8 +83,8 @@ export default function SurveyPage() {
             ))}
           </svg>
           <figcaption className="mt-6 flex justify-between border-t border-line pt-4 font-mono text-xs text-subtle">
-            <span>Boundary points and contours</span>
-            <span>Total Station + GPS</span>
+            <span>{text.figure.caption}</span>
+            <span>{text.figure.equipment}</span>
           </figcaption>
         </figure>
       </Container>

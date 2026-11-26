@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, type ReactNode } from "react";
-import { whatsappLink } from "@/data/site";
+import type { PageTexts } from "@/lib/types";
 import { useMediaQuery } from "./motion";
 import Crosshair from "./react-bits/Crosshair";
 import DotGrid from "./react-bits/DotGrid";
@@ -10,14 +10,19 @@ import RotatingText from "./react-bits/RotatingText";
 import SplitText from "./react-bits/SplitText";
 import { ArrowIcon, buttonClass, Container, textLinkClass, WhatsAppIcon } from "./ui";
 
-const plotTypes = ["5 Marla", "10 Marla", "1 Kanal", "commercial"];
-const facts = ["PDF + DWG files", "Approval-ready sets", "Same-day reply"];
-
 /**
  * Home page hero, styled like CAD model space: a springy dot grid, and on desktop a crosshair
  * cursor that reads out coordinates and measures the buttons it passes over.
  */
-export function Hero({ drawing }: { drawing: ReactNode }) {
+export function Hero({
+  text,
+  whatsappHref,
+  drawing,
+}: {
+  text: PageTexts["home"]["hero"];
+  whatsappHref: string;
+  drawing: ReactNode;
+}) {
   const ref = useRef<HTMLElement>(null);
   const desktop = useMediaQuery("(pointer: fine) and (min-width: 1024px)");
 
@@ -52,11 +57,11 @@ export function Hero({ drawing }: { drawing: ReactNode }) {
 
       <Container className="grid items-center gap-14 py-16 sm:py-20 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[1.25fr_0.75fr] lg:py-24">
         <div>
-          <p className="eyebrow motion-safe:fade-up">Naqsha nawees · Land survey · Pakistan</p>
+          <p className="eyebrow motion-safe:fade-up">{text.eyebrow}</p>
           <h1 className="mt-7 text-display">
-            <SplitText text="Your plot, drawn" tag="span" splitType="chars" effect="rise" mask duration={0.9} delay={28} trigger="load" textAlign="left" />{" "}
+            <SplitText text={text.title} tag="span" splitType="chars" effect="rise" mask duration={0.9} delay={28} trigger="load" textAlign="left" />{" "}
             <SplitText
-              text="to the last inch."
+              text={text.titleAccent}
               tag="span"
               splitType="chars"
               effect="rise"
@@ -72,34 +77,33 @@ export function Hero({ drawing }: { drawing: ReactNode }) {
             className="mt-8 max-w-[46ch] text-lg text-muted motion-safe:fade-up"
             style={{ "--draw-delay": "0.5s" } as React.CSSProperties}
           >
-            Residential and commercial plans, approval-ready drawings, and land survey for homeowners, builders and
-            developers.
+            {text.intro}
           </p>
           <div
             className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-lg motion-safe:fade-up"
             style={{ "--draw-delay": "0.6s" } as React.CSSProperties}
           >
-            <span className="text-muted">Drawings for</span>
+            <span className="text-muted">{text.rotatingPrefix}</span>
             <RotatingText
-              texts={plotTypes}
+              texts={text.rotatingWords}
               highlight
               highlightColor="#e5ae4b"
               mainClassName="font-mono text-base font-medium text-on-accent"
               rotationInterval={2400}
               effect="slide"
             />
-            <span className="text-muted">plots</span>
+            <span className="text-muted">{text.rotatingSuffix}</span>
           </div>
           <div
             className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4 motion-safe:fade-up"
             style={{ "--draw-delay": "0.7s" } as React.CSSProperties}
           >
-            <a href={whatsappLink()} className={buttonClass()}>
+            <a href={whatsappHref} className={buttonClass()}>
               <WhatsAppIcon className="size-5" />
-              Get your plot drawn
+              {text.primaryCta}
             </a>
             <Link href="/projects" className={textLinkClass}>
-              See projects
+              {text.secondaryCta}
               <ArrowIcon className="size-4 transition group-hover:translate-x-1" />
             </Link>
           </div>
@@ -107,8 +111,8 @@ export function Hero({ drawing }: { drawing: ReactNode }) {
             className="mt-14 flex flex-wrap gap-x-6 gap-y-2 border-t border-line pt-5 font-mono text-[0.78rem] text-subtle motion-safe:fade-up"
             style={{ "--draw-delay": "0.85s" } as React.CSSProperties}
           >
-            {facts.map((f) => (
-              <li key={f} className="flex items-center gap-2">
+            {text.facts.map((f, i) => (
+              <li key={i} className="flex items-center gap-2">
                 <span aria-hidden="true" className="size-1.5 bg-accent" />
                 {f}
               </li>

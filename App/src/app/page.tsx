@@ -8,43 +8,55 @@ import { ProjectCard } from "@/components/project-card";
 import ScrollVelocity from "@/components/react-bits/ScrollVelocity";
 import SpotlightCard from "@/components/react-bits/SpotlightCard";
 import Topography from "@/components/react-bits/Topography";
-import { Accent, ArrowIcon, buttonClass, Container, SectionHeader, textLinkClass } from "@/components/ui";
-import { getProject, plotSize, projects } from "@/data/projects";
-import { services, surveySpecs } from "@/data/services";
+import { AccentTitle, ArrowIcon, buttonClass, Container, SectionHeader, textLinkClass } from "@/components/ui";
+import { findProjectPage, getPage, getProcessSteps, getProjects, getServices, getSite, getSurveySpecs } from "@/lib/content";
+import { plotSize, whatsappLink } from "@/lib/format";
 
 // Wide card, narrow card, then narrow, wide: a zig-zag instead of a row of equal boxes.
 const serviceSpans = ["md:col-span-7", "md:col-span-5", "md:col-span-5", "md:col-span-7"];
 const projectSpans = ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-span-7"];
 
-export default function HomePage() {
-  const heroProject = getProject("family-house-10-marla")!;
+export default async function HomePage() {
+  const [text, { site }, services, processSteps, projects, surveySpecs] = await Promise.all([
+    getPage("home"),
+    getSite(),
+    getServices(),
+    getProcessSteps(),
+    getProjects(),
+    getSurveySpecs(),
+  ]);
+  const heroProject = (await findProjectPage(text.hero.featuredProject))?.project;
 
   return (
     <>
       <Hero
+        text={text.hero}
+        whatsappHref={whatsappLink(site.whatsappNumber)}
         drawing={
-          <figure
-            className="relative mx-auto w-full max-w-110 rounded-2xl border border-line bg-surface shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] motion-safe:fade-up"
-            style={{ "--draw-delay": "0.2s" } as React.CSSProperties}
-          >
-            <div className="flex items-center justify-between border-b border-line px-5 py-3 font-mono text-[0.7rem] text-subtle">
-              <span className="tracking-[0.12em] uppercase">{heroProject.drawingNo} · Plot map</span>
-              <span>{plotSize(heroProject)}</span>
-            </div>
-            <div className="px-3 py-4">
-              <PlotMap project={heroProject} tone="model" animated className="mx-auto block h-auto max-h-[62vh] w-full" />
-            </div>
-            <figcaption className="flex items-center justify-between border-t border-line px-5 py-3 font-mono text-[0.7rem] text-subtle">
-              <span>{heroProject.name}</span>
-              <span>{heroProject.city}</span>
-            </figcaption>
-          </figure>
+          heroProject && (
+            <figure
+              className="relative mx-auto w-full max-w-110 rounded-2xl border border-line bg-surface shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)] motion-safe:fade-up"
+              style={{ "--draw-delay": "0.2s" } as React.CSSProperties}
+            >
+              <div className="flex items-center justify-between border-b border-line px-5 py-3 font-mono text-[0.7rem] text-subtle">
+                <span className="tracking-[0.12em] uppercase">{heroProject.drawingNo} · Plot map</span>
+                <span>{plotSize(heroProject)}</span>
+              </div>
+              <div className="px-3 py-4">
+                <PlotMap project={heroProject} tone="model" animated className="mx-auto block h-auto max-h-[62vh] w-full" />
+              </div>
+              <figcaption className="flex items-center justify-between border-t border-line px-5 py-3 font-mono text-[0.7rem] text-subtle">
+                <span>{heroProject.name}</span>
+                <span>{heroProject.city}</span>
+              </figcaption>
+            </figure>
+          )
         }
       />
 
       <div aria-hidden="true" className="border-b border-line py-10 sm:py-14">
         <ScrollVelocity
-          texts={["5 Marla · 10 Marla · 1 Kanal · Commercial · ", "Floor plans · Elevations · Working drawings · Approval sets · Land survey · "]}
+          texts={text.marquee.lines}
           velocity={35}
           numCopies={4}
           fontSize="clamp(2.25rem, 5.5vw, 4.75rem)"
@@ -59,16 +71,12 @@ export default function HomePage() {
         <Container>
           <SectionHeader
             index="01"
-            label="Services"
-            title={
-              <>
-                Drawings your contractor <Accent>can build from.</Accent>
-              </>
-            }
-            intro="Every service ends with files you can print or send: PDF for review and DWG for your engineer."
+            label={text.servicesSection.label}
+            title={<AccentTitle text={text.servicesSection} />}
+            intro={text.servicesSection.intro}
             action={
               <Link href="/services" className={textLinkClass}>
-                All services
+                {text.servicesSection.linkLabel}
                 <ArrowIcon className="size-4 transition group-hover:translate-x-1" />
               </Link>
             }
@@ -80,7 +88,7 @@ export default function HomePage() {
                 spotlightColor="#e5ae4b"
                 intensity={0.09}
                 spotlightSize={320}
-                className={`group ${serviceSpans[i]}`}
+                className={`group ${serviceSpans[i % serviceSpans.length]}`}
                 style={
                   {
                     "--spotlight-card-surface": "var(--color-surface)",
@@ -106,17 +114,9 @@ export default function HomePage() {
 
       <section className="pb-24 sm:pb-32">
         <Container>
-          <SectionHeader
-            index="02"
-            label="Process"
-            title={
-              <>
-                From a WhatsApp message to <Accent>a DWG file.</Accent>
-              </>
-            }
-          />
+          <SectionHeader index="02" label={text.processSection.label} title={<AccentTitle text={text.processSection} />} />
           <div className="mt-14">
-            <ProcessSteps />
+            <ProcessSteps steps={processSteps} />
           </div>
         </Container>
       </section>
@@ -125,16 +125,12 @@ export default function HomePage() {
         <Container>
           <SectionHeader
             index="03"
-            label="Projects"
-            title={
-              <>
-                Recent <Accent>drawings.</Accent>
-              </>
-            }
-            intro="Sample plot maps, each with a room schedule and an area statement."
+            label={text.projectsSection.label}
+            title={<AccentTitle text={text.projectsSection} />}
+            intro={text.projectsSection.intro}
             action={
               <Link href="/projects" className={textLinkClass}>
-                All projects
+                {text.projectsSection.linkLabel}
                 <ArrowIcon className="size-4 transition group-hover:translate-x-1" />
               </Link>
             }
@@ -157,24 +153,22 @@ export default function HomePage() {
         <Container className="grid gap-14 py-24 sm:py-32 lg:grid-cols-12">
           <div className="lg:col-span-6">
             <p className="eyebrow">
-              <span className="text-accent">04</span> / Land survey
+              <span className="text-accent">04</span> / {text.surveySection.label}
             </p>
             <h2 className="mt-6 max-w-[14ch] text-heading">
-              Before we draw, <Accent>we measure.</Accent>
+              <AccentTitle text={text.surveySection} />
             </h2>
-            <p className="mt-6 max-w-[46ch] text-muted">
-              Boundary and topographic surveys, so your drawings start from exact site measurements.
-            </p>
+            <p className="mt-6 max-w-[46ch] text-muted">{text.surveySection.intro}</p>
             <Link href="/survey" className={`${buttonClass("secondary")} mt-10 bg-canvas/60 backdrop-blur`}>
-              About land survey
+              {text.surveySection.buttonLabel}
               <ArrowIcon />
             </Link>
           </div>
           <Reveal stagger={0.08} className="grid content-end gap-px self-end overflow-hidden rounded-2xl border border-line bg-line lg:col-span-5 lg:col-start-8">
-            {surveySpecs.map(([k, v]) => (
-              <div key={k} className="bg-canvas/80 px-6 py-5 backdrop-blur">
-                <p className="font-mono text-[0.7rem] tracking-[0.12em] text-subtle uppercase">{k}</p>
-                <p className="mt-1">{v}</p>
+            {surveySpecs.map((spec, i) => (
+              <div key={i} className="bg-canvas/80 px-6 py-5 backdrop-blur">
+                <p className="font-mono text-[0.7rem] tracking-[0.12em] text-subtle uppercase">{spec.title}</p>
+                <p className="mt-1">{spec.text}</p>
               </div>
             ))}
           </Reveal>

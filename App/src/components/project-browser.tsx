@@ -1,17 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { categories, type Category, type Project } from "@/data/projects";
+import type { Category, PageTexts, ProjectSummary } from "@/lib/types";
 import { ProjectCard } from "./project-card";
 
-type Filter = Category | "all";
-
-export function ProjectBrowser({ projects }: { projects: Project[] }) {
-  const [filter, setFilter] = useState<Filter>("all");
+export function ProjectBrowser({
+  projects,
+  categories,
+  empty,
+}: {
+  projects: ProjectSummary[];
+  categories: Category[];
+  empty: PageTexts["projects"]["empty"];
+}) {
+  const [filter, setFilter] = useState("all");
   const shown = filter === "all" ? projects : projects.filter((p) => p.category === filter);
-  const filters: { id: Filter; label: string; count: number }[] = [
+  const filters = [
     { id: "all", label: "All", count: projects.length },
-    ...categories.map((c) => ({ ...c, count: projects.filter((p) => p.category === c.id).length })),
+    ...categories.map((c) => ({ id: c.id, label: c.label, count: projects.filter((p) => p.category === c.id).length })),
   ];
 
   return (
@@ -48,8 +54,8 @@ export function ProjectBrowser({ projects }: { projects: Project[] }) {
         </div>
       ) : (
         <div className="mt-10 rounded-2xl border border-dashed border-line-strong px-6 py-16 text-center">
-          <p className="text-subheading">No drawings in this size yet</p>
-          <p className="mt-2 text-muted">Send your plot size on WhatsApp to start one.</p>
+          <p className="text-subheading">{empty.title}</p>
+          <p className="mt-2 text-muted">{empty.text}</p>
         </div>
       )}
     </>

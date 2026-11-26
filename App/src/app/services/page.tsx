@@ -1,24 +1,18 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/motion";
 import { ServiceArt } from "@/components/plan/service-art";
-import { Accent, buttonClass, Container, PageHeader, WhatsAppIcon } from "@/components/ui";
-import { services } from "@/data/services";
-import { whatsappLink } from "@/data/site";
+import { AccentTitle, buttonClass, Container, PageHeader, WhatsAppIcon } from "@/components/ui";
+import { getPage, getServices, getSite } from "@/lib/content";
+import { whatsappLink } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Services" };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const [text, services, { site }] = await Promise.all([getPage("services"), getServices(), getSite()]);
+
   return (
     <>
-      <PageHeader
-        label="Services"
-        title={
-          <>
-            Four kinds of drawing, <Accent>one set of files.</Accent>
-          </>
-        }
-        intro="Every service ends with files you can print or send: PDF for review and DWG for your engineer."
-      />
+      <PageHeader label={text.header.label} title={<AccentTitle text={text.header} />} intro={text.header.intro} />
       <Container className="py-10 sm:py-16">
         {services.map((s, i) => (
           <Reveal key={s.id} className="grid items-center gap-10 border-b border-line py-14 last:border-b-0 md:grid-cols-12 md:gap-12 md:py-20">
@@ -42,12 +36,12 @@ export default function ServicesPage() {
       <Container className="pb-24">
         <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-surface p-8 sm:flex-row sm:items-center sm:p-10">
           <div>
-            <p className="text-subheading">Not sure which drawings you need?</p>
-            <p className="mt-1 text-muted">Send your plot size and what you plan to build. We will tell you.</p>
+            <p className="text-subheading">{text.cta.title}</p>
+            <p className="mt-1 text-muted">{text.cta.text}</p>
           </div>
-          <a href={whatsappLink("Hi, I would like a quote for drawings.")} className={buttonClass()}>
+          <a href={whatsappLink(site.whatsappNumber, text.cta.whatsappMessage)} className={buttonClass()}>
             <WhatsAppIcon className="size-5" />
-            Ask for a quote
+            {text.cta.buttonLabel}
           </a>
         </div>
       </Container>

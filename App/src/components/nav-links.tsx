@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { navLinks, site, whatsappLink } from "@/data/site";
+import { whatsappLink } from "@/lib/format";
+import type { NavLink } from "@/lib/types";
 import { buttonClass, WhatsAppIcon } from "./ui";
 
 function isCurrent(pathname: string, href: string) {
@@ -11,7 +12,17 @@ function isCurrent(pathname: string, href: string) {
 }
 
 /** Desktop nav, the WhatsApp button, and the full-screen menu on phones and tablets. */
-export function NavLinks() {
+export function NavLinks({
+  links,
+  whatsappNumber,
+  whatsappDisplay,
+  hours,
+}: {
+  links: NavLink[];
+  whatsappNumber: string;
+  whatsappDisplay: string;
+  hours: string;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -36,7 +47,7 @@ export function NavLinks() {
   return (
     <>
       <nav aria-label="Main" className="hidden h-full items-stretch lg:flex">
-        {navLinks.map(({ href, label }) => {
+        {links.map(({ href, label }) => {
           const current = isCurrent(pathname, href);
           return (
             <Link
@@ -54,7 +65,7 @@ export function NavLinks() {
       </nav>
 
       <div className="flex items-center gap-2">
-        <a href={whatsappLink()} className={buttonClass("primary", "sm")}>
+        <a href={whatsappLink(whatsappNumber)} className={buttonClass("primary", "sm")}>
           <WhatsAppIcon />
           WhatsApp
         </a>
@@ -80,7 +91,7 @@ export function NavLinks() {
       {open && (
         <div id="mobile-menu" className="fixed inset-x-0 top-16 bottom-0 z-30 overflow-y-auto bg-canvas lg:hidden">
           <nav aria-label="Main" className="flex flex-col px-5 pt-6 sm:px-8">
-            {navLinks.map(({ href, label }, i) => {
+            {links.map(({ href, label }, i) => {
               const current = isCurrent(pathname, href);
               return (
                 <Link
@@ -99,8 +110,8 @@ export function NavLinks() {
             })}
           </nav>
           <div className="px-5 py-8 font-mono text-sm text-muted sm:px-8">
-            <p>WhatsApp {site.whatsappDisplay}</p>
-            <p>{site.hours}</p>
+            <p>WhatsApp {whatsappDisplay}</p>
+            <p>{hours}</p>
           </div>
         </div>
       )}

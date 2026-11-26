@@ -1,4 +1,4 @@
-import type { ServiceId } from "@/data/services";
+import type { ServiceId } from "@/lib/types";
 
 // Small line drawings, one per service, in the "model" tone. Inside a `group`, the accent lines brighten on hover.
 const base = "fill-none stroke-fg/70 stroke-[1.5]";

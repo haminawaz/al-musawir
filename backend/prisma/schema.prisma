@@ -1,0 +1,149 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id           Int      @id @default(1)
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admin")
+}
+
+model SiteSettings {
+  id              Int      @id @default(1)
+  name            String
+  tagline         String
+  headerLabel     String   @map("header_label")
+  whatsappDisplay String   @map("whatsapp_display")
+  whatsappNumber  String   @map("whatsapp_number")
+  hours           String
+  seoTitle        String   @map("seo_title")
+  seoDescription  String   @map("seo_description")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model NavLink {
+  href     String @id
+  label    String
+  position Int
+
+  @@index([position])
+  @@map("nav_links")
+}
+
+model Service {
+  id           String   @id
+  name         String
+  summary      String
+  deliverables String
+  position     Int
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([position])
+  @@map("services")
+}
+
+model ProcessStep {
+  id       Int    @id @default(autoincrement())
+  title    String
+  text     String
+  position Int
+
+  @@index([position])
+  @@map("process_steps")
+}
+
+model SurveySpec {
+  id       Int    @id @default(autoincrement())
+  title    String
+  text     String
+  position Int
+
+  @@index([position])
+  @@map("survey_specs")
+}
+
+model Category {
+  id       String    @id
+  label    String
+  position Int
+  projects Project[]
+
+  @@index([position])
+  @@map("categories")
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  categoryId   String   @map("category_id")
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  city         String
+  society      String
+  client       String
+  plotNo       String   @map("plot_no")
+  floors       String
+  drawingNo    String   @map("drawing_no")
+  scale        String
+  /// Free text on the drawing's title block (for example "March 2026"), not a timestamp.
+  date         String
+  status       String
+  plotWidth    Float    @map("plot_width")
+  plotDepth    Float    @map("plot_depth")
+  roadWidth    Float    @map("road_width")
+  setbackFront Float    @map("setback_front")
+  setbackRear  Float    @map("setback_rear")
+  setbackLeft  Float    @map("setback_left")
+  setbackRight Float    @map("setback_right")
+  rooms        Json     @db.Json
+  openings     Json     @db.Json
+  coveredArea  Float    @map("covered_area")
+  position     Int
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([position])
+  @@index([categoryId, position])
+  @@map("projects")
+}
+
+model PageContent {
+  key       String   @id
+  content   Json     @db.Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("page_contents")
+}
+
+enum ActivityAction {
+  created
+  updated
+  deleted
+}
+
+model Activity {
+  id        String         @id @default(cuid())
+  createdAt DateTime       @default(now()) @map("created_at")
+  userName  String         @map("user_name")
+  action    ActivityAction
+  target    String
+  href      String?
+
+  @@index([createdAt(sort: Desc)])
+  @@index([href])
+  @@map("activity_log")
+}

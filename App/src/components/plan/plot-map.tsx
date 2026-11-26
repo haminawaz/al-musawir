@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { Opening, Project } from "@/data/projects";
+import type { Opening, Project } from "@/lib/types";
 import { px, tones, type PlanTone } from "./styles";
 
 // Sheet layout, in SVG px. The plot depth always fills 600px; the scale follows from that.
@@ -108,7 +108,7 @@ export function PlotMap({
         const x = X(r.x);
         const x2 = X(r.x + r.w);
         return (
-          <g key={r.name}>
+          <g key={i}>
             <rect
               className={t.innerWall + drawClass}
               {...draw(0.35 + i * 0.08)}
@@ -177,7 +177,7 @@ export function PlotMap({
         const lx = X(r.label?.x ?? r.x + r.w / 2);
         const ly = Y(r.label?.y ?? r.y + r.d / 2);
         return (
-          <g key={r.name} className={fadeGroup} {...fade(1.5 + i * 0.05)}>
+          <g key={i} className={fadeGroup} {...fade(1.5 + i * 0.05)}>
             <text className={t.roomName} fontSize={size} x={lx} y={ly} textAnchor="middle">
               {r.name}
             </text>

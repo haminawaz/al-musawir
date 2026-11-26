@@ -67,7 +67,7 @@ export function ProjectEditor({ slug, duplicateOf }: { slug?: string; duplicateO
     () => (saved && draft ? JSON.stringify(saved) !== JSON.stringify(draft) || (isNew && !!duplicateOf && !created) : false),
     [saved, draft, isNew, duplicateOf, created],
   );
-  useUnsavedChanges(dirty);
+  useUnsavedChanges(dirty, isNew ? "the new project" : `“${saved?.name ?? "this project"}”`);
 
   const change = useCallback(
     (fn: (p: Project) => Project) =>

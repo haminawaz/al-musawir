@@ -53,7 +53,7 @@ export function useDocument<T>(path: string, options: { label: string; validate?
     () => saved !== null && draft !== null && JSON.stringify(saved) !== JSON.stringify(draft),
     [saved, draft],
   );
-  useUnsavedChanges(dirty);
+  useUnsavedChanges(dirty, options.label);
 
   const { label, validate } = options;
   const save = useCallback(async () => {

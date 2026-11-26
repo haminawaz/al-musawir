@@ -2,26 +2,33 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId } from "react";
-import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 
-// Tracks editors with unsaved changes. Leaving one through a link inside the dashboard shows
-// an in-app toast; closing or reloading the tab shows the browser's own prompt, the only one
+// Tracks editors with unsaved changes. Leaving one through a link inside the dashboard opens
+// a dialog; closing or reloading the tab shows the browser's own prompt, the only one
 // browsers allow there.
 
-const dirtyEditors = new Set<string>();
+/** Editor id -> what it edits, e.g. "Land survey details". */
+const dirtyEditors = new Map<string, string>();
 
-/** Fired when someone tries to leave with unsaved changes; the save bar flashes. */
+/** Fired when someone chooses to stay with unsaved changes; the save bar flashes. */
 export const UNSAVED_NUDGE_EVENT = "unsaved-changes:nudge";
 
 export function hasUnsavedChanges() {
   return dirtyEditors.size > 0;
 }
 
-export function useUnsavedChanges(dirty: boolean) {
+/** "Services", "Site settings and Navigation". */
+function describeUnsaved() {
+  const labels = [...new Set(dirtyEditors.values())];
+  return labels.length > 1 ? `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}` : labels[0];
+}
+
+export function useUnsavedChanges(dirty: boolean, label: string) {
   const id = useId();
   useEffect(() => {
     if (!dirty) return;
-    dirtyEditors.add(id);
+    dirtyEditors.set(id, label);
     const warn = (e: BeforeUnloadEvent) => {
       if (dirtyEditors.has(id)) e.preventDefault();
     };
@@ -30,46 +37,41 @@ export function useUnsavedChanges(dirty: boolean) {
       dirtyEditors.delete(id);
       window.removeEventListener("beforeunload", warn);
     };
-  }, [dirty, id]);
+  }, [dirty, id, label]);
 }
 
 /**
  * Returns `askToLeave(leave)`: runs `leave` straight away when nothing is unsaved,
- * otherwise asks in a toast first.
+ * otherwise asks in a dialog first.
  */
 export function useLeaveGuard() {
-  const toast = useToast();
+  const confirm = useConfirm();
   return useCallback(
-    (leave: () => void) => {
+    async (leave: () => void) => {
       if (!hasUnsavedChanges()) return leave();
-      window.dispatchEvent(new Event(UNSAVED_NUDGE_EVENT));
-      toast.show({
-        key: "unsaved-changes",
+      const ok = await confirm({
+        title: "Leave without saving?",
+        body: `Your changes to ${describeUnsaved()} have not been saved. If you leave this page, they will be lost.`,
+        cancelLabel: "Stay on this page",
+        confirmLabel: "Leave without saving",
+        danger: true,
         tone: "warning",
-        message: "You have unsaved changes.",
-        detail: "Save them first, or leave this page and lose them.",
-        duration: 10000,
-        actions: [
-          {
-            label: "Leave without saving",
-            variant: "danger",
-            onClick: () => {
-              // The person chose to go: let this navigation through, including the browser's unload check.
-              dirtyEditors.clear();
-              leave();
-            },
-          },
-          { label: "Stay", autoFocus: true },
-        ],
       });
+      if (ok) {
+        // The person chose to go: let this navigation through, including the browser's unload check.
+        dirtyEditors.clear();
+        leave();
+      } else {
+        window.dispatchEvent(new Event(UNSAVED_NUDGE_EVENT));
+      }
     },
-    [toast],
+    [confirm],
   );
 }
 
 /**
  * Catches clicks on any link inside the dashboard while there are unsaved changes,
- * and asks in a toast instead of navigating. Mounted once, in the shell.
+ * and asks in a dialog instead of navigating. Mounted once, in the shell.
  */
 export function LeaveGuard() {
   const router = useRouter();

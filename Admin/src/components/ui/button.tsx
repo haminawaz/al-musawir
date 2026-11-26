@@ -8,6 +8,8 @@ const variants = {
   secondary: "border border-line-strong text-fg hover:border-subtle hover:bg-raised",
   ghost: "text-muted hover:bg-raised hover:text-fg",
   danger: "border border-danger/40 text-danger hover:bg-danger/10",
+  /** Solid red, for the confirm button in a dialog. */
+  destructive: "bg-danger text-[#240c08] hover:bg-[#f5a093]",
 };
 
 const sizes = {
